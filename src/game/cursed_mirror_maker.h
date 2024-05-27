@@ -1,6 +1,11 @@
 #ifndef cursed_mirror_maker_h
 #define cursed_mirror_maker_h
+
+#ifndef BBPLAYER
 #include "libcart/ff/ff.h"
+#else
+#include "bbcard/include/card.h"
+#endif
 
 #define CMM_TILE_POOL_SIZE 15000
 #define CMM_GFX_SIZE 15000
@@ -13,7 +18,11 @@
 #define TILE_SIZE 256
 
 #define CMM_VERSION 1
+#ifndef BBPLAYER
 #define MAX_FILE_NAME_SIZE 41
+#else
+#define MAX_FILE_NAME_SIZE (BB_INODE16_NAMELEN + 2)
+#endif
 #define MAX_USERNAME_SIZE 31
 
 void save_level(void);
@@ -27,7 +36,7 @@ Gfx *cmm_append(s32 callContext, UNUSED struct GraphNode *node, UNUSED Mat4 mtx)
 s32 cmm_main_menu(void);
 extern Gfx cmm_terrain_gfx[CMM_GFX_SIZE];
 extern Trajectory cmm_trajectory_list[CMM_MAX_TRAJECTORIES][CMM_TRAJECTORY_LENGTH][4];
-void rotate_obj_toward_trajectory_angle(struct Object * obj, u32 traj_id);
+void rotate_obj_toward_trajectory_angle(struct Object *obj, u32 traj_id);
 s32 draw_cmm_pause_menu(void);
 void cmm_init_pause_menu(void);
 void play_cmm_extra_music(u8 index);
@@ -45,7 +54,7 @@ extern u8 cmm_lopt_envfx;
 extern u8 cmm_lopt_costume;
 extern u8 cmm_envfx_table[];
 
-//play mode stuff
+// play mode stuff
 extern u8 cmm_play_stars;
 extern u8 cmm_play_stars_max;
 extern u64 cmm_play_stars_bitfield;
@@ -58,8 +67,8 @@ extern TCHAR cmm_file_name[MAX_FILE_NAME_SIZE];
 extern char cmm_username[MAX_USERNAME_SIZE];
 extern u8 cmm_has_username;
 
-extern void* cmm_theme_segments[][4];
-extern LevelScript * cmm_theme_model_scripts[];
+extern void *cmm_theme_segments[][4];
+extern LevelScript *cmm_theme_model_scripts[];
 
 enum {
     CMM_PM_NONE,
@@ -68,8 +77,8 @@ enum {
     CMM_PM_WATER,
 };
 
-#define GRID_TO_POS(gridx) ((gridx) * TILE_SIZE - (32 * TILE_SIZE) + TILE_SIZE/2)
-#define POS_TO_GRID(pos) (((pos) + (32 * TILE_SIZE) - TILE_SIZE/2) / TILE_SIZE)
+#define GRID_TO_POS(gridx) ((gridx) * TILE_SIZE - (32 * TILE_SIZE) + TILE_SIZE / 2)
+#define POS_TO_GRID(pos) (((pos) + (32 * TILE_SIZE) - TILE_SIZE / 2) / TILE_SIZE)
 
 enum cmm_directions {
     CMM_DIRECTION_UP,
@@ -81,9 +90,9 @@ enum cmm_directions {
 };
 
 #define CMM_GRID_FLAG_OCCUPIED (1 << 7)
-#define CMM_GRID_MASK_ROT   (0x3 << 5)
-#define CMM_GRID_SHIFT_ROT  (5)
-#define CMM_GRID_MASK_TILETYPE  (0x1F)
+#define CMM_GRID_MASK_ROT (0x3 << 5)
+#define CMM_GRID_SHIFT_ROT (5)
+#define CMM_GRID_MASK_TILETYPE (0x1F)
 
 enum cmm_culling_shapes {
     CMM_FACESHAPE_FULL,
@@ -108,7 +117,7 @@ enum cmm_culling_shapes {
     // 0x13 empty
     CMM_FACESHAPE_LOWERGENTLE_1 = CMM_FACESHAPE_BOTTOMSLAB_PRI + 4,
     CMM_FACESHAPE_LOWERGENTLE_2,
-    
+
     // & 0x20: Top slab priority list
     CMM_FACESHAPE_TOPSLAB_PRI = 0x20,
     CMM_FACESHAPE_DOWNUPPERGENTLE_1 = CMM_FACESHAPE_TOPSLAB_PRI,
@@ -123,10 +132,10 @@ enum cmm_growth_types {
     CMM_GROWTH_NONE,
     CMM_GROWTH_FULL,
     CMM_GROWTH_NORMAL_SIDE,
-    CMM_GROWTH_HALF_SIDE, // vertical slabs - either side
+    CMM_GROWTH_HALF_SIDE,         // vertical slabs - either side
     CMM_GROWTH_UNDERSLOPE_CORNER, // special check
     CMM_GROWTH_DIAGONAL_SIDE,
-    CMM_GROWTH_VSLAB_SIDE, // vertical slabs - middle face
+    CMM_GROWTH_VSLAB_SIDE,     // vertical slabs - middle face
     CMM_GROWTH_DLGENTLE_UNDER, // special check
     CMM_GROWTH_UNCONDITIONAL,
 
@@ -160,12 +169,12 @@ struct cmm_boundary_quad {
 struct cmm_terrain {
     u8 numQuads;
     u8 numTris;
-    struct cmm_terrain_poly * quads;
-    struct cmm_terrain_poly * tris;
+    struct cmm_terrain_poly *quads;
+    struct cmm_terrain_poly *tris;
 };
 
 struct cmm_tile {
-    u32 x:6, y:6, z:6, type:5, mat:4, rot:2, waterlogged:1;
+    u32 x : 6, y : 6, z : 6, type : 5, mat : 4, rot : 2, waterlogged : 1;
 };
 
 struct cmm_obj {
@@ -180,7 +189,7 @@ struct cmm_obj {
 };
 
 struct cmm_grid_obj {
-    u16 type:5, mat:4, rot:2, occupied:1, waterlogged:1;
+    u16 type : 5, mat : 4, rot : 2, occupied : 1, waterlogged : 1;
 };
 
 enum cmm_df_context {
@@ -191,10 +200,10 @@ enum cmm_df_context {
 typedef void (*DisplayFunc)(s32);
 
 #define OBJ_TYPE_IS_BILLBOARDED (1 << 0)
-#define OBJ_TYPE_TRAJECTORY     (1 << 1)
-#define OBJ_TYPE_HAS_STAR       (1 << 2)
-#define OBJ_TYPE_HAS_DIALOG     (1 << 3)
-#define OBJ_TYPE_IMBUABLE       (1 << 4)
+#define OBJ_TYPE_TRAJECTORY (1 << 1)
+#define OBJ_TYPE_HAS_STAR (1 << 2)
+#define OBJ_TYPE_HAS_DIALOG (1 << 3)
+#define OBJ_TYPE_IMBUABLE (1 << 4)
 #define OBJ_TYPE_IMBUABLE_COINS (1 << 5)
 struct cmm_object_info {
     char *name;
@@ -202,9 +211,9 @@ struct cmm_object_info {
     const BehaviorScript *behavior;
     f32 y_offset;
     u16 model_id;
-    u16 flags:6;
-    u16 numCoins:4;
-    u16 numExtraObjects:3;
+    u16 flags : 6;
+    u16 numCoins : 4;
+    u16 numExtraObjects : 3;
     f32 scale;
     const struct Animation *const *anim;
     DisplayFunc disp_func;
@@ -215,7 +224,7 @@ struct ExclamationBoxContents {
     u8 behParams;
     ModelID16 model;
     const BehaviorScript *behavior;
-    u8 animState; //not shitcum
+    u8 animState; // not shitcum
     u8 doRespawn;
     u8 numCoins;
 };
@@ -223,9 +232,9 @@ struct ExclamationBoxContents {
 extern struct ExclamationBoxContents *cmm_exclamation_box_contents;
 
 struct cmm_ui_button_type {
-    u32 placeMode:2;
-    u32 multiObj:1;
-    u32 paramCount:8;
+    u32 placeMode : 2;
+    u32 multiObj : 1;
+    u32 paramCount : 8;
 
     union {
         u32 id;
@@ -314,7 +323,7 @@ struct cmm_custom_theme {
     u8 water;
 };
 
-//compressed trajectories
+// compressed trajectories
 struct cmm_comptraj {
     s8 t;
     u8 x;
@@ -432,13 +441,13 @@ enum cmm_themes {
 };
 
 struct cmm_dialog_topic {
-    char * name;
+    char *name;
     u8 dialog_id;
 };
 
 struct cmm_dialog_subject {
-    char * name;
-    struct cmm_dialog_topic * topic_list;
+    char *name;
+    struct cmm_dialog_topic *topic_list;
     u8 topic_list_size;
 };
 

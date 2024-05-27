@@ -1,5 +1,11 @@
 extern u8 gDialogCharWidths[256];
 
+#ifndef BBPLAYER
+#define FNAME fname
+#else
+#define FNAME name
+#endif
+
 u8 cmm_ascii_lut[] = {
     0,0,0,0,0,0,0,0, // 0 - 7
     0,0,0xFE,0,0,0,0,0, // 8 - 15
@@ -2287,7 +2293,7 @@ s32 cmm_main_menu(void) {
                 if (CMM_VERSION < cmm_level_entry_version[i]) {
                     print_maker_string_ascii(75 + xPosAnim,startRenderY - 10 -(i*36),"Created in future version, update to play.",4);
                 } else {
-                    print_maker_string_ascii(75 + xPosAnim,startRenderY - 10 -(i*36),level_entries_ptr[startRenderIndex + i].fname,(selectedIndex == renderIndex));
+                    print_maker_string_ascii(75 + xPosAnim,startRenderY - 10 -(i*36),level_entries_ptr[startRenderIndex + i].FNAME,(selectedIndex == renderIndex));
                 }
 
             }
@@ -2308,8 +2314,8 @@ s32 cmm_main_menu(void) {
                 cmm_mode = CMM_MODE_UNINITIALIZED;
                 reset_play_state();
                 int i = 0;
-                while(level_entries_ptr[cmm_menu_index].fname[i] && (i < MAX_FILE_NAME_SIZE - 1)) {
-                    cmm_file_name[i] = level_entries_ptr[cmm_menu_index].fname[i];
+                while(level_entries_ptr[cmm_menu_index].FNAME[i] && (i < MAX_FILE_NAME_SIZE - 1)) {
+                    cmm_file_name[i] = level_entries_ptr[cmm_menu_index].FNAME[i];
                     i++;
                 }
                 cmm_file_name[i] = '\0'; // add null terminator

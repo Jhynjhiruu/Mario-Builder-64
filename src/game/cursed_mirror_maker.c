@@ -55,8 +55,12 @@
 #include "levels/scripts.h"
 #include "emutest.h"
 
+#ifndef BBPLAYER
 #include "libcart/include/cart.h"
 #include "libcart/ff/ff.h"
+#else
+#include "bbcard/include/card.h"
+#endif
 
 extern void super_cum_working(struct Object *obj, s32 animIndex);
 
@@ -2710,7 +2714,14 @@ void update_painting() {
 
 TCHAR cmm_file_name[MAX_FILE_NAME_SIZE];
 FIL cmm_file;
+#ifndef BBPLAYER
 FILINFO cmm_file_info;
+#else
+struct {
+    char fname[BB_INODE16_NAMELEN + 2];
+    OSBbStatBuf stat;
+} cmm_file_info;
+#endif
 
 char file_header_string[] = "MB64-v1.0";
 
@@ -2799,6 +2810,7 @@ void save_level(void) {
 
     TCHAR path[256];
     create_level_file_path(path, cmm_file_name, NULL);
+#ifndef BBPLAYER
     UINT bytes_written;
     f_open(&cmm_file,path, FA_READ | FA_WRITE | FA_CREATE_ALWAYS);
     //write header
@@ -2809,6 +2821,36 @@ void save_level(void) {
     f_write(&cmm_file,&cmm_object_data,(sizeof(cmm_object_data[0])*cmm_object_count),&bytes_written);
 
     f_close(&cmm_file);
+#else
+    u32 filesize = sizeof(cmm_save) + (sizeof(cmm_tile_data[0])*cmm_tile_count) + (sizeof(cmm_object_data[0])*cmm_object_count);
+
+    osBbFDelete(path);
+    osBbFCreate(path, 0, filesize);
+    s32 fd = osBbFOpen(path, "wb");
+    if (fd < 0) {
+        return;
+    }
+
+    u32 off = 0;
+    s32 written = 0;
+
+    written = osBbFWrite(fd, off, &cmm_save, sizeof(cmm_save));
+    if (written < 0) {
+        goto _save_level__exit;
+    }
+    off += written;
+
+    written = osBbFWrite(fd, off, &cmm_tile_data, (sizeof(cmm_tile_data[0])*cmm_tile_count));
+    if (written < 0) {
+        goto _save_level__exit;
+    }
+    off += written;
+
+    osBbFWrite(fd, off, &cmm_object_data, (sizeof(cmm_object_data[0])*cmm_object_count));
+    
+_save_level__exit:
+    osBbFClose(fd);
+#endif
 }
 
 void load_level(void) {
@@ -2821,6 +2863,7 @@ void load_level(void) {
 
     TCHAR path[256];
     create_level_file_path(path, cmm_file_name, NULL);
+#ifndef BBPLAYER
     FRESULT code = f_stat(path,&cmm_file_info);
     if (code == FR_OK) {
         UINT bytes_read;
@@ -2885,6 +2928,82 @@ void load_level(void) {
 
         bcopy(&cmm_default_custom,&cmm_save.custom_theme,sizeof(struct cmm_custom_theme));
     }
+#else
+    s32 fd = osBbFOpen(path, "rb");
+    if (fd < 0) {
+        // fresh level
+        fresh = TRUE;
+        strncpy(path,cmm_file_name,MAX_FILE_NAME_SIZE);
+
+        //Set version
+        cmm_save.version = CMM_VERSION;
+
+        //Place spawn location
+        cmm_save.object_count = 1;
+        cmm_object_data[0].x = 32;
+        cmm_object_data[0].z = 32;
+        cmm_object_data[0].y = cmm_templates[cmm_lopt_template].spawnHeight;
+        cmm_object_data[0].type = OBJECT_TYPE_MARIO_SPAWN;
+
+        cmm_save.game = cmm_lopt_game;
+        cmm_save.size = cmm_lopt_size;
+
+        cmm_save.seq[0] = cmm_templates[cmm_lopt_template].music[cmm_lopt_game];
+        cmm_save.seq[1] = 1;
+        cmm_save.seq[2] = 10;
+        if (cmm_lopt_game == CMM_GAME_BTCM) {
+            cmm_save.seq[2] = 22;
+        }
+        cmm_save.envfx = cmm_templates[cmm_lopt_template].envfx;
+        cmm_save.theme = cmm_templates[cmm_lopt_template].theme;
+        cmm_save.bg = cmm_templates[cmm_lopt_template].bg;
+        cmm_save.boundary_mat = cmm_templates[cmm_lopt_template].plane;
+        cmm_save.boundary = 1;
+        cmm_save.boundary_height = 5;
+
+        bcopy(&cmm_toolbar_defaults,&cmm_save.toolbar,sizeof(cmm_save.toolbar));
+        bzero(&cmm_save.toolbar_params,sizeof(cmm_save.toolbar_params));
+
+        if (cmm_templates[cmm_lopt_template].platform) {
+            u8 i = 0;
+            for (s32 x = -1; x <= 1; x++) {
+                for (s32 z = -1; z <= 1; z++) {
+                    cmm_tile_data[i].x = 32+x;
+                    cmm_tile_data[i].y = 0;
+                    cmm_tile_data[i].z = 32+z;
+                    cmm_tile_data[i].type = TILE_TYPE_BLOCK;
+                    cmm_tile_data[i].mat = 0;
+                    i++;
+                }
+            }
+            cmm_save.tile_count = i;
+        }
+
+        bcopy(&cmm_default_custom,&cmm_save.custom_theme,sizeof(struct cmm_custom_theme));
+
+    } else {
+        u32 off = 0;
+        s32 read = 0;
+
+        read = osBbFRead(fd, off, &cmm_save, sizeof(cmm_save));
+        if (read < 0) {
+            goto _load_level__exit;
+        }
+        off += read;
+        
+        read = osBbFRead(fd, off, &cmm_tile_data, sizeof(cmm_tile_data[0])*cmm_save.tile_count);
+        if (read < 0) {
+            goto _load_level__exit;
+        }
+        off += read;
+
+        osBbFRead(fd, off, &cmm_object_data, sizeof(cmm_object_data[0])*cmm_save.object_count);
+
+_load_level__exit:
+        osBbFClose(fd);
+    }
+
+#endif
 
     cmm_save.author[MAX_USERNAME_SIZE - 1] = '\0'; // memory leak prevention
     cmm_tile_count = cmm_save.tile_count;

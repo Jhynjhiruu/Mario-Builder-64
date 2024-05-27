@@ -4,8 +4,13 @@
 #include "macros.h"
 #include "surface_terrains.h"
 #include "types.h"
+
+#ifndef BBPLAYER
 #include "libcart/include/cart.h"
 #include "libcart/ff/ff.h"
+#else
+#include "bbcard/include/card.h"
+#endif
 #include "src/game/game_init.h"
 
 #ifdef VERSION_EU

@@ -3,15 +3,16 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/include/n64/**",
+                "${workspaceFolder}/include/ique/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/textures/**",
-                "${workspaceFolder}/build/us_n64/**",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/build/us_bb/**",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}"
             ],
             "forcedInclude": [
                 "${workspaceFolder}/include/types.h",
-                "${workspaceFolder}/include/n64/ultra64.h",
+                "${workspaceFolder}/include/ique/ultra64.h",
                 "${workspaceFolder}/include/sm64.h",
                 "${workspaceFolder}/include/config.h",
                 "${workspaceFolder}/include/make_const_nonconst.h",
@@ -23,12 +24,14 @@
             ],
             "defines": [
                 "TARGET_N64=1",
+                "BBPLAYER=1",
                 "VERSION_US=1",
                 "F3DEX_GBI_2=1",
                 "F3DZEX_NON_GBI_2=1",
-                "F3DEX_GBI_SHARED=1"
+                "F3DEX_GBI_SHARED=1",
+                "SRAM=1"
             ],
-            "compilerPath": "/usr/bin/mips-linux-gnu-gcc",
+            "compilerPath": "/opt/crashsdk/bin/mips-n64-gcc",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x86"

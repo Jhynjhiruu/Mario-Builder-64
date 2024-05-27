@@ -6,6 +6,12 @@ OUTPUT_ARCH (mips)
 #include "config.h"
 #undef LINKER
 
+#ifndef BBPLAYER
+#define CART libcart
+#else
+#define CART bbcard
+#endif
+
 #define BEGIN_SEG(name, addr) \
     _##name##SegmentStart = ADDR(.name); \
     _##name##SegmentRomStart = __romPos; \
@@ -179,7 +185,7 @@ SECTIONS
       */librtc.a:*.o(.text*);
       */libz.a:*.o(.text*);
       */libhvqm2.a:*.o(.text*);
-      BUILD_DIR/src/libcart*.o(.text*);
+      BUILD_DIR/src/CART*.o(.text*);
       lib/rspboot.o(.text*);
 #include "rsptext.inc.ld"
       BUILD_DIR/lib/aspMain.o(.text*);
@@ -197,7 +203,7 @@ SECTIONS
 #endif
       */ULTRALIB.a:*.o(.data*);
       */libhvqm2.a:*.o(.data*);
-      BUILD_DIR/src/libcart*.o(.data*);
+      BUILD_DIR/src/CART*.o(.data*);
       */librtc.a:*.o(.data*);
       */libz.a:*.o(.data*);
 #include "rspdata.inc.ld"
@@ -219,7 +225,7 @@ SECTIONS
       */libz.a:*.o(.rodata*);
 
       lib/PR/hvqm/hvqm2sp1.o(.rodata*);
-      BUILD_DIR/src/libcart*.o(.rodata*);
+      BUILD_DIR/src/CART*.o(.rodata*);
    }
    END_SEG(main)
    BEGIN_NOLOAD(main)
@@ -236,7 +242,7 @@ SECTIONS
       */ULTRALIB.a:*.o(.scommon);
       */ULTRALIB.a:*.o(.*bss*);
       */libhvqm2.a:*.o(.bss*);
-      BUILD_DIR/src/libcart*.o(.bss*);
+      BUILD_DIR/src/CART*.o(.bss*);
       */librtc.a:*.o(.bss*);
       */libz.a:*.o(.bss*);
       . = ALIGN(0x8);

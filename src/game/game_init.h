@@ -13,8 +13,12 @@
 #define MARIO_ANIMS_POOL_SIZE 0x4000
 #define DEMO_INPUTS_POOL_SIZE 0x800
 
+#ifndef BBPLAYER
 #include "libcart/include/cart.h"
 #include "libcart/ff/ff.h"
+#else
+#include "bbcard/include/card.h"
+#endif
 #include "cursed_mirror_maker.h"
 
 struct GfxPool {

@@ -21,7 +21,11 @@
  * Enables Rumble Pak Support.
  * Currently not recommended, as it may cause random crashes.
  */
+#ifndef BBPLAYER
 #define ENABLE_RUMBLE (1 || VERSION_SH)
+#else
+#define ENABLE_RUMBLE (0)
+#endif
 
 /**
  * The maximum number of supported players/controllers. 1-4.

@@ -340,10 +340,16 @@ ACTOR_DIR      := actors
 LEVEL_DIRS     := $(patsubst levels/%,%,$(dir $(wildcard levels/*/header.h)))
 
 # Directories containing source files
-SRC_DIRS += src src/libcart/ff src/libcart/src src/boot src/game src/engine src/audio src/menu src/buffers src/libpl actors levels bin data assets asm lib sound
+SRC_DIRS += src src/boot src/game src/engine src/audio src/menu src/buffers src/libpl actors levels bin data assets asm lib sound
 LIBZ_SRC_DIRS := src/libz
 GODDARD_SRC_DIRS := src/goddard src/goddard/dynlists
 BIN_DIRS := bin bin/$(VERSION)
+
+ifeq      ($(CONSOLE),n64)
+  SRC_DIRS += src/libcart/ff src/libcart/src
+else ifeq ($(CONSOLE),bb)
+  SRC_DIRS += src/bbcard/src
+endif
 
 # File dependencies and variables for specific files
 include Makefile.split
@@ -429,7 +435,7 @@ else
   CPP     := cpp
 endif
 ifneq ($(call find-command,mips-n64-ld),)
-LD        := mips-n64-ld
+LD        := tools/mips64-elf-ld
 else
 LD        := tools/mips64-elf-ld
 endif
@@ -449,7 +455,13 @@ ifeq ($(TARGET_N64),1)
   CC_CFLAGS := -fno-builtin
 endif
 
-INCLUDE_DIRS += include $(BUILD_DIR) $(BUILD_DIR)/include src . include/hvqm src/libcart/include
+INCLUDE_DIRS += include $(BUILD_DIR) $(BUILD_DIR)/include src . include/hvqm
+ifeq      ($(CONSOLE),n64)
+  INCLUDE_DIRS += src/libcart/include
+else ifeq ($(CONSOLE),bb)
+  INCLUDE_DIRS += src/bbcard/include
+endif
+
 ifeq ($(TARGET_N64),1)
   INCLUDE_DIRS += include/libc
 endif
@@ -864,7 +876,7 @@ $(BUILD_DIR)/sm64_prelim.elf: $(BUILD_DIR)/sm64_prelim.ld
 
 $(BUILD_DIR)/goddard.txt: $(BUILD_DIR)/sm64_prelim.elf
 	$(call print,Getting Goddard size...)
-	$(V)python3 tools/getGoddardSize.py $(BUILD_DIR)/sm64_prelim.map $(VERSION)
+	$(V)python3 tools/getGoddardSize.py $(BUILD_DIR)/sm64_prelim.map $(VERSION) $(CONSOLE)
 
 $(BUILD_DIR)/asm/debug/map.o: asm/debug/map.s $(BUILD_DIR)/sm64_prelim.elf
 	$(call print,Assembling:,$<,$@)

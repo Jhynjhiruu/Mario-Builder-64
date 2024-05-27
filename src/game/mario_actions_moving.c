@@ -1268,7 +1268,9 @@ s32 act_riding_shell_ground(struct MarioState *m) {
     }
 
     adjust_sound_for_speed(m);
+#if ENABLE_RUMBLE
     reset_rumble_timers_slip();
+#endif
     return FALSE;
 }
 

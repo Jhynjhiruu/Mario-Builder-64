@@ -1644,14 +1644,18 @@ void update_mario_health(struct MarioState *m) {
             // Play a noise to alert the player when Mario is close to drowning.
             if (((m->action & ACT_GROUP_MASK) == ACT_GROUP_SUBMERGED) && (gMarioState->numAir < 200)) {
                 play_sound(SOUND_MOVING_ALMOST_DROWNING, gGlobalSoundSource);
+                #if ENABLE_RUMBLE
                 if (gRumblePakTimer == 0) {
                     gRumblePakTimer = 36;
                     if (is_rumble_finished_and_queue_empty()) {
                         queue_rumble_data(3, 30);
                     }
                 }
+                #endif
             } else {
+                #if ENABLE_RUMBLE
                 gRumblePakTimer = 0;
+                #endif
             }
         } else {
             //AIR: Vanilla Behavior
@@ -1949,8 +1953,12 @@ u16 posRecordIndex;
 f32 bad_apple_par = 0.0f;
 
 #include "memory.h"
+#ifndef BBPLAYER
 #include "libcart/include/cart.h"
 #include "libcart/ff/ff.h"
+#else
+#include "bbcard/include/card.h"
+#endif
 #include "game_init.h"
 
 u32 star_radar_objects_to_track[] = {
